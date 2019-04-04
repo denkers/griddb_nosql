@@ -1,0 +1,42 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: alarm-manager-api
+  namespace: platforms
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: alarm-manager-api
+    spec:
+      containers:
+      - name: alarm-manager-api
+        image: alexanderacr.azurecr.io/alarm-manager-api:0.1.1
+        imagePullPolicy: Always
+        env:
+          - name: ASPNETCORE_ENVIRONMENT
+            value: "Development"
+          - name: ConnectionString
+            value: "Server=tcp:devsqlalarms.database.windows.net,1433;Initial Catalog=alarms;Persist Security Info=False;User ID=adminuser;Password=Satrack2019*;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 300Mi
+          limits:
+            cpu: 200m
+            memory: 500Mi
+      imagePullSecrets:
+      - name: alexsecret
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: alarm-manager-api
+  namespace: platforms
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: alarm-manager-api
